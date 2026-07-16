@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import {
   Bell,
@@ -14,10 +15,12 @@ import {
   Settings,
   LogOut,
   UserRound,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +31,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useContractsStore } from "@/store/use-contracts-store";
+import { useAuthStore } from "@/store/use-auth-store";
+import { useUsuarioAtual, usePerfilAtual } from "@/hooks/use-auth";
 import { contratosEmRiscoProximos30Dias } from "@/lib/flow-calculations";
 import { formatarDataLonga, iniciais } from "@/lib/calculations";
 import { useHasMounted } from "@/hooks/use-has-mounted";
@@ -52,6 +57,13 @@ export function Header({ onOpenSearch, onToggleMobileSidebar }: HeaderProps) {
   const contratos = useContractsStore((s) => s.contratos);
   const ultimaAtualizacao = useContractsStore((s) => s.ultimaAtualizacao);
   const abrirPainelContrato = useContractsStore((s) => s.abrirPainelContrato);
+  const info = useAuthStore((s) => s.infoInstitucional);
+  const logout = useAuthStore((s) => s.logout);
+  const usuario = useUsuarioAtual();
+  const perfil = usePerfilAtual();
+
+  const nomeUsuario = usuario?.nome ?? "Usuário";
+  const cargoUsuario = usuario?.cargo ?? "";
 
   const notificacoes = useMemo(() => {
     const emRisco = contratosEmRiscoProximos30Dias(contratos).slice(0, 3);
@@ -100,7 +112,7 @@ export function Header({ onOpenSearch, onToggleMobileSidebar }: HeaderProps) {
           </span>
         </div>
         <span className="truncate text-[11px] text-muted-foreground/80">
-          Secretaria de Serviços Compartilhados · Superintendência Regional de Administração · Bahia
+          {info.unidade} · {info.setor} · {info.cidade}/MS
         </span>
       </div>
 
@@ -169,28 +181,37 @@ export function Header({ onOpenSearch, onToggleMobileSidebar }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <button className="ml-0.5 flex items-center gap-2 rounded-full p-0.5 pr-1 transition-colors hover:bg-accent sm:pr-2.5">
               <Avatar className="size-8">
-                <AvatarFallback>{iniciais("Thayssa Kerollyn")}</AvatarFallback>
+                <AvatarFallback>{iniciais(nomeUsuario)}</AvatarFallback>
               </Avatar>
               <div className="hidden flex-col items-start leading-tight sm:flex">
-                <span className="text-xs font-semibold">Thayssa Kerollyn</span>
-                <span className="text-[10.5px] text-muted-foreground">Coordenação de Contratos</span>
+                <span className="text-xs font-semibold">{nomeUsuario}</span>
+                <span className="text-[10.5px] text-muted-foreground">{cargoUsuario}</span>
               </div>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-60">
-            <DropdownMenuLabel className="flex flex-col gap-0.5">
-              <span className="text-sm font-semibold text-foreground">Thayssa Kerollyn</span>
-              <span className="text-xs font-normal text-muted-foreground">thayssakerollyn@gmail.com</span>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuLabel className="flex flex-col gap-1">
+              <span className="text-sm font-semibold text-foreground">{nomeUsuario}</span>
+              <span className="text-xs font-normal text-muted-foreground">{usuario?.email}</span>
+              {perfil && (
+                <Badge variant={perfil.sistema ? "danger" : "outline"} className="mt-1 w-fit gap-1 text-[10px]">
+                  <ShieldCheck className="size-3" /> {perfil.nome}
+                </Badge>
+              )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <UserRound /> Meu perfil
+            <DropdownMenuItem asChild>
+              <Link href="/perfil">
+                <UserRound /> Meu perfil
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings /> Configurações
+            <DropdownMenuItem asChild>
+              <Link href="/configuracoes">
+                <Settings /> Configurações
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
+            <DropdownMenuItem variant="destructive" onClick={logout}>
               <LogOut /> Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

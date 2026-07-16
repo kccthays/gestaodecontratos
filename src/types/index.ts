@@ -123,3 +123,48 @@ export interface StreakInfo {
   disponivel: boolean;
   contratosAtivosSemPlano: number;
 }
+
+// ── Acesso, perfis e permissões ────────────────────────────────────────────
+
+export type PermissionKey =
+  | "gerenciar_usuarios"
+  | "gerenciar_permissoes"
+  | "editar_info_institucional"
+  | "editar_contratos"
+  | "editar_prorrogacoes"
+  | "editar_penalidades"
+  | "editar_fluxo"
+  | "editar_processos_sei"
+  | "importar_dados"
+  | "editar_relatorios";
+
+export interface PerfilAcesso {
+  id: string;
+  nome: string;
+  descricao: string;
+  cor: string;
+  /** Perfis do sistema não podem ser excluídos e mantêm acesso total. */
+  sistema?: boolean;
+  permissoes: PermissionKey[];
+}
+
+export interface Usuario {
+  id: string;
+  nome: string;
+  email: string;
+  cargo: string;
+  setor: string;
+  perfilId: string;
+  senha: string;
+  ativo: boolean;
+  criadoEm: string;
+}
+
+export interface InfoInstitucional {
+  sistema: string;
+  secretaria: string;
+  unidade: string;
+  setor: string;
+  estado: string;
+  cidade: string;
+}
