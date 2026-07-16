@@ -9,14 +9,18 @@ import {
   FolderKanban,
   Settings,
   Workflow,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
+import type { PermissionKey } from "@/types";
 
 export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
   badge?: string;
+  /** Se definido, o item só aparece para quem possui ao menos uma das permissões. */
+  permissoes?: PermissionKey[];
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -29,5 +33,11 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Cronograma", href: "/cronograma", icon: CalendarDays },
   { label: "Relatórios", href: "/relatorios", icon: FileBarChart },
   { label: "Processos SEI", href: "/processos-sei", icon: FolderKanban },
+  {
+    label: "Usuários e Permissões",
+    href: "/usuarios",
+    icon: UsersRound,
+    permissoes: ["gerenciar_usuarios", "gerenciar_permissoes"],
+  },
   { label: "Configurações", href: "/configuracoes", icon: Settings },
 ];

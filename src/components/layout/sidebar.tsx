@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -8,6 +9,8 @@ import { ChevronsLeft, ChevronsRight, LifeBuoy, ShieldCheck } from "lucide-react
 import { NAV_ITEMS } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { usePerfilAtual } from "@/hooks/use-auth";
+import { perfilTemPermissao } from "@/lib/permissions";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -18,6 +21,17 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
+  const perfil = usePerfilAtual();
+
+  const itensVisiveis = useMemo(
+    () =>
+      NAV_ITEMS.filter(
+        (item) =>
+          !item.permissoes ||
+          item.permissoes.some((p) => perfilTemPermissao(perfil, p))
+      ),
+    [perfil]
+  );
 
   return (
     <>
@@ -58,7 +72,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
         </div>
 
         <nav className="scrollbar-thin flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {NAV_ITEMS.map((item) => {
+          {itensVisiveis.map((item) => {
             const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
             const link = (
               <Link

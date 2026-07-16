@@ -45,6 +45,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useContractsStore, useContratoSelecionado } from "@/store/use-contracts-store";
+import { usePermissao } from "@/hooks/use-auth";
 import {
   classificarFaixa,
   diasRestantes,
@@ -75,6 +76,7 @@ export function ContractDetailPanel() {
   const painelAberto = useContractsStore((s) => s.painelAberto);
   const fecharPainelContrato = useContractsStore((s) => s.fecharPainelContrato);
   const atualizarContrato = useContractsStore((s) => s.atualizarContrato);
+  const podeEditarContrato = usePermissao("editar_contratos");
 
   const [editOpen, setEditOpen] = useState(false);
   const [seiOpen, setSeiOpen] = useState(false);
@@ -296,9 +298,11 @@ export function ContractDetailPanel() {
           </ScrollArea>
 
           <SheetFooter className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <Button variant="outline" size="sm" onClick={abrirEdicao}>
-              <Pencil className="size-3.5" /> Editar
-            </Button>
+            {podeEditarContrato && (
+              <Button variant="outline" size="sm" onClick={abrirEdicao}>
+                <Pencil className="size-3.5" /> Editar
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => setSeiOpen(true)}>
               <ExternalLink className="size-3.5" /> Processo
             </Button>

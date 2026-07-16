@@ -16,7 +16,7 @@ function Header({ title }: { title: string }) {
   return (
     <div style={{ borderBottom: "3px solid #1351b4", paddingBottom: 12, marginBottom: 16 }}>
       <p style={{ fontSize: 11, color: "#475467" }}>
-        SIGC · Secretaria de Serviços Compartilhados · Superintendência Regional de Administração
+        SIGC · Superintendência Regional de Administração no Estado do Mato Grosso do Sul · Seção de Licitações e Contratos · Campo Grande/MS
       </p>
       <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0b2a5c" }}>{title}</h1>
       <p style={{ fontSize: 10, color: "#98a2b3" }}>Emitido em {formatarData(new Date().toISOString().slice(0, 10))}</p>
