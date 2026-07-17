@@ -64,7 +64,7 @@ const safeStorage = createJSONStorage(() => {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      usuarioAtualId: USUARIOS_PADRAO[0].id,
+      usuarioAtualId: null,
       usuarios: USUARIOS_PADRAO,
       perfis: PERFIS_PADRAO,
       infoInstitucional: INFO_INSTITUCIONAL_PADRAO,
@@ -217,7 +217,7 @@ export const useAuthStore = create<AuthState>()(
           usuarios: USUARIOS_PADRAO,
           perfis: PERFIS_PADRAO,
           infoInstitucional: INFO_INSTITUCIONAL_PADRAO,
-          usuarioAtualId: USUARIOS_PADRAO[0].id,
+          usuarioAtualId: null,
           erroLogin: null,
         }),
     }),

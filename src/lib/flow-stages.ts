@@ -10,7 +10,7 @@ import {
   BadgeCheck,
   type LucideIcon,
 } from "lucide-react";
-import type { FlowStageId } from "@/types";
+import type { FlowStageId, FlowStageState, FlowStageStatus } from "@/types";
 
 export interface FlowStageMeta {
   id: FlowStageId;
@@ -106,4 +106,36 @@ export const FLOW_STAGE_MAP: Record<FlowStageId, FlowStageMeta> = FLOW_STAGES.re
 
 export function stageIndex(id: FlowStageId): number {
   return FLOW_STAGES.findIndex((s) => s.id === id);
+}
+
+/**
+ * Recalcula o array de etapas de um contrato de forma coerente com a etapa
+ * atual escolhida: tudo antes vira "concluída", a etapa atual fica em
+ * "andamento" (ou "concluída" se for a última, Nova Vigência) e o restante
+ * volta para "não iniciada". Usado ao marcar como concluído, reabrir ou
+ * mudar a etapa manualmente pela edição do contrato.
+ */
+export function recalcularFluxoPara(
+  fluxo: FlowStageState[],
+  etapaAtualId: FlowStageId,
+  dataMovimentacao: string
+): FlowStageState[] {
+  const idxAtual = stageIndex(etapaAtualId);
+  const ultima = idxAtual === FLOW_STAGES.length - 1;
+  const statusAtual: FlowStageStatus = ultima ? "concluida" : "andamento";
+  return fluxo.map((etapa): FlowStageState => {
+    const idx = stageIndex(etapa.stageId);
+    if (idx < idxAtual) {
+      return { ...etapa, status: "concluida", percentualConcluido: 100 };
+    }
+    if (idx === idxAtual) {
+      return {
+        ...etapa,
+        status: statusAtual,
+        percentualConcluido: ultima ? 100 : 60,
+        ultimaMovimentacao: dataMovimentacao,
+      };
+    }
+    return { ...etapa, status: "nao-iniciada", percentualConcluido: 0 };
+  });
 }

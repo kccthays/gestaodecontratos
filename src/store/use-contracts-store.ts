@@ -3,10 +3,13 @@
 import { create } from "zustand";
 import { format } from "date-fns";
 import type { CalendarEvent, Contract, Penalty } from "@/types";
-import { gerarDatasetMock } from "@/lib/mock-data";
+import { gerarDatasetMock, HOJE } from "@/lib/mock-data";
 import { parseContractsWorkbook } from "@/lib/excel-import";
+import { diasRestantes } from "@/lib/calculations";
+import { recalcularFluxoPara } from "@/lib/flow-stages";
 
 const datasetInicial = gerarDatasetMock();
+const DATA_HOJE = format(HOJE, "yyyy-MM-dd");
 
 export interface ImportacaoPendente {
   nomeArquivo: string;
@@ -37,6 +40,8 @@ interface ContractsState {
   cancelarImportacao: () => void;
   restaurarDadosExemplo: () => void;
   atualizarContrato: (id: string, patch: Partial<Contract>) => void;
+  marcarConcluido: (id: string) => void;
+  reabrirContrato: (id: string) => void;
 }
 
 export const useContractsStore = create<ContractsState>((set, get) => ({
@@ -101,6 +106,38 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
   atualizarContrato: (id, patch) =>
     set((state) => ({
       contratos: state.contratos.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+    })),
+
+  marcarConcluido: (id) =>
+    set((state) => ({
+      contratos: state.contratos.map((c) => {
+        if (c.id !== id) return c;
+        return {
+          ...c,
+          etapaAtualId: "nova-vigencia",
+          status: "vigente",
+          diasAntecedenciaConclusao: diasRestantes(c.dataTermino, HOJE),
+          ultimaMovimentacao: DATA_HOJE,
+          ultimaMovimentacaoDescricao: "Prorrogação concluída — nova vigência registrada",
+          fluxo: recalcularFluxoPara(c.fluxo, "nova-vigencia", DATA_HOJE),
+        };
+      }),
+    })),
+
+  reabrirContrato: (id) =>
+    set((state) => ({
+      contratos: state.contratos.map((c) => {
+        if (c.id !== id) return c;
+        return {
+          ...c,
+          etapaAtualId: "publicacao",
+          status: "em-prorrogacao",
+          diasAntecedenciaConclusao: undefined,
+          ultimaMovimentacao: DATA_HOJE,
+          ultimaMovimentacaoDescricao: "Contrato reaberto para acompanhamento da prorrogação",
+          fluxo: recalcularFluxoPara(c.fluxo, "publicacao", DATA_HOJE),
+        };
+      }),
     })),
 }));
 

@@ -2,10 +2,31 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, ClipboardList, Flame, PartyPopper, Trophy, type LucideIcon } from "lucide-react";
+import { toast } from "sonner";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ClipboardList,
+  Flame,
+  MoreVertical,
+  PartyPopper,
+  Pencil,
+  RotateCcw,
+  Trophy,
+  type LucideIcon,
+} from "lucide-react";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ContractEditDialog } from "@/components/contracts/contract-edit-dialog";
 import { useContractsStore } from "@/store/use-contracts-store";
-import { agruparPorFaixa, diasRestantes, FAIXA_META } from "@/lib/calculations";
+import { usePermissao } from "@/hooks/use-auth";
+import { agruparPorFaixa, diasRestantes, FAIXA_META, isConcluido } from "@/lib/calculations";
 import { HOJE } from "@/lib/mock-data";
 import type { Contract, FaixaAntecedencia } from "@/types";
 import { cn } from "@/lib/utils";
@@ -29,20 +50,48 @@ export function AntecedenciaCards() {
   const grupos = agruparPorFaixa(contratos, HOJE);
   const ordem: FaixaAntecedencia[] = ["planejamento", "meta-batida", "atencao", "zona-critica"];
 
+  const podeEditar = usePermissao("editar_contratos");
+  const podeMoverFluxo = usePermissao("editar_fluxo");
+  const [editId, setEditId] = useState<string | null>(null);
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {ordem.map((faixa, i) => (
-        <FaixaCard key={faixa} faixa={faixa} contratos={grupos[faixa]} delay={i * 0.08} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {ordem.map((faixa, i) => (
+          <FaixaCard
+            key={faixa}
+            faixa={faixa}
+            contratos={grupos[faixa]}
+            delay={i * 0.08}
+            podeEditar={podeEditar}
+            podeMoverFluxo={podeMoverFluxo}
+            onEditar={setEditId}
+          />
+        ))}
+      </div>
+      <ContractEditDialog contratoId={editId} onClose={() => setEditId(null)} />
+    </>
   );
 }
 
-function FaixaCard({ faixa, contratos, delay }: { faixa: FaixaAntecedencia; contratos: Contract[]; delay: number }) {
+function FaixaCard({
+  faixa,
+  contratos,
+  delay,
+  podeEditar,
+  podeMoverFluxo,
+  onEditar,
+}: {
+  faixa: FaixaAntecedencia;
+  contratos: Contract[];
+  delay: number;
+  podeEditar: boolean;
+  podeMoverFluxo: boolean;
+  onEditar: (id: string) => void;
+}) {
   const [expandido, setExpandido] = useState(false);
   const meta = FAIXA_META[faixa];
   const Icon = FAIXA_ICON[faixa];
-  const abrirPainelContrato = useContractsStore((s) => s.abrirPainelContrato);
   const visiveis = expandido ? contratos : contratos.slice(0, 4);
 
   return (
@@ -71,22 +120,14 @@ function FaixaCard({ faixa, contratos, delay }: { faixa: FaixaAntecedencia; cont
       ) : (
         <div className="flex flex-1 flex-col gap-1.5">
           {visiveis.map((c) => (
-            <button
+            <ContratoRow
               key={c.id}
-              onClick={() => abrirPainelContrato(c.id)}
-              className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/60"
-            >
-              <span className={cn("size-1.5 shrink-0 rounded-full", meta.corClasse)} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-foreground">
-                  {c.numero} <span className="font-normal text-muted-foreground">· {c.empresa}</span>
-                </p>
-                <p className="truncate text-[11px] text-muted-foreground">{c.observacaoStatus}</p>
-              </div>
-              <span className="shrink-0 text-[11px] font-semibold text-muted-foreground group-hover:text-foreground">
-                {diasRestantes(c.dataTermino, HOJE)}d
-              </span>
-            </button>
+              contrato={c}
+              corClasse={meta.corClasse}
+              podeEditar={podeEditar}
+              podeMoverFluxo={podeMoverFluxo}
+              onEditar={onEditar}
+            />
           ))}
           {contratos.length > 4 && (
             <button
@@ -99,6 +140,95 @@ function FaixaCard({ faixa, contratos, delay }: { faixa: FaixaAntecedencia; cont
         </div>
       )}
     </motion.div>
+  );
+}
+
+function ContratoRow({
+  contrato,
+  corClasse,
+  podeEditar,
+  podeMoverFluxo,
+  onEditar,
+}: {
+  contrato: Contract;
+  corClasse: string;
+  podeEditar: boolean;
+  podeMoverFluxo: boolean;
+  onEditar: (id: string) => void;
+}) {
+  const abrirPainelContrato = useContractsStore((s) => s.abrirPainelContrato);
+  const marcarConcluido = useContractsStore((s) => s.marcarConcluido);
+  const reabrirContrato = useContractsStore((s) => s.reabrirContrato);
+  const concluido = isConcluido(contrato);
+  const mostrarMenu = podeEditar || podeMoverFluxo;
+
+  function concluir() {
+    marcarConcluido(contrato.id);
+    const antecedencia = diasRestantes(contrato.dataTermino, HOJE);
+    if (antecedencia >= 90 && antecedencia <= 120) {
+      toast.success(`Contrato ${contrato.numero} concluído e movido para “Meta Batida”.`);
+    } else {
+      toast.success(
+        `Contrato ${contrato.numero} marcado como concluído. Como foi finalizado com ${antecedencia} dia(s) de antecedência, ele sai das faixas de acompanhamento — você continua vendo-o na página Contratos.`
+      );
+    }
+  }
+
+  function reabrir() {
+    reabrirContrato(contrato.id);
+    toast.info(`Contrato ${contrato.numero} reaberto para acompanhamento.`);
+  }
+
+  return (
+    <div className="group flex items-center gap-1 rounded-lg pr-1 transition-colors hover:bg-accent/60">
+      <button
+        onClick={() => abrirPainelContrato(contrato.id)}
+        className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left"
+      >
+        <span className={cn("size-1.5 shrink-0 rounded-full", corClasse)} />
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1 truncate text-xs font-semibold text-foreground">
+            {concluido && <CheckCircle2 className="size-3 shrink-0 text-success" />}
+            {contrato.numero} <span className="font-normal text-muted-foreground">· {contrato.empresa}</span>
+          </p>
+          <p className="truncate text-[11px] text-muted-foreground">{contrato.observacaoStatus}</p>
+        </div>
+        <span className="shrink-0 text-[11px] font-semibold text-muted-foreground group-hover:text-foreground">
+          {diasRestantes(contrato.dataTermino, HOJE)}d
+        </span>
+      </button>
+
+      {mostrarMenu && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-60 transition-colors hover:bg-accent hover:text-foreground focus:opacity-100 group-hover:opacity-100"
+              aria-label={`Ações do contrato ${contrato.numero}`}
+            >
+              <MoreVertical className="size-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-52">
+            {podeMoverFluxo &&
+              (concluido ? (
+                <DropdownMenuItem onClick={reabrir}>
+                  <RotateCcw /> Reabrir contrato
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={concluir}>
+                  <CheckCircle2 /> Marcar como concluído
+                </DropdownMenuItem>
+              ))}
+            {podeMoverFluxo && podeEditar && <DropdownMenuSeparator />}
+            {podeEditar && (
+              <DropdownMenuItem onClick={() => onEditar(contrato.id)}>
+                <Pencil /> Editar contrato
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
   );
 }
 
