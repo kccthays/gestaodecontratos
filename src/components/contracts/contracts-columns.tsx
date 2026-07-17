@@ -1,10 +1,8 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Eye } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { Contract } from "@/types";
 import { classificarFaixa, diasRestantes, FAIXA_META, formatarData, formatarMoeda } from "@/lib/calculations";
 import { FLOW_STAGE_MAP } from "@/lib/flow-stages";
@@ -26,34 +24,36 @@ export const contractColumns: ColumnDef<Contract>[] = [
   {
     accessorKey: "empresa",
     header: "Empresa",
-    cell: ({ row }) => <span className="block max-w-[200px] truncate">{row.original.empresa}</span>,
+    cell: ({ row }) => <span className="block max-w-[150px] truncate">{row.original.empresa}</span>,
   },
   {
     accessorKey: "objeto",
     header: "Objeto",
+    meta: { className: "hidden 2xl:table-cell" },
     cell: ({ row }) => (
-      <span className="block max-w-[220px] truncate text-muted-foreground">{row.original.objeto}</span>
+      <span className="block max-w-[200px] truncate text-muted-foreground">{row.original.objeto}</span>
     ),
     enableSorting: false,
   },
   {
     accessorKey: "fiscal",
     header: "Fiscal",
-    cell: ({ row }) => <span className="block max-w-[150px] truncate">{row.original.fiscal}</span>,
+    meta: { className: "hidden lg:table-cell" },
+    cell: ({ row }) => <span className="block max-w-[130px] truncate">{row.original.fiscal}</span>,
   },
   {
     accessorKey: "valor",
     header: "Valor",
-    cell: ({ row }) => formatarMoeda(row.original.valor),
+    cell: ({ row }) => <span className="whitespace-nowrap">{formatarMoeda(row.original.valor)}</span>,
   },
   {
     accessorKey: "dataTermino",
     header: "Vigência até",
-    cell: ({ row }) => formatarData(row.original.dataTermino),
+    cell: ({ row }) => <span className="whitespace-nowrap">{formatarData(row.original.dataTermino)}</span>,
   },
   {
     id: "diasRestantes",
-    header: "Dias restantes",
+    header: "Dias rest.",
     accessorFn: (row) => diasRestantes(row.dataTermino, HOJE),
     cell: ({ row }) => {
       const dias = diasRestantes(row.original.dataTermino, HOJE);
@@ -66,6 +66,17 @@ export const contractColumns: ColumnDef<Contract>[] = [
     },
   },
   {
+    id: "etapa",
+    header: "Etapa",
+    meta: { className: "hidden xl:table-cell" },
+    accessorFn: (row) => FLOW_STAGE_MAP[row.etapaAtualId].nome,
+    cell: ({ row }) => (
+      <span className="block max-w-[130px] truncate text-xs text-muted-foreground">
+        {FLOW_STAGE_MAP[row.original.etapaAtualId].nome}
+      </span>
+    ),
+  },
+  {
     id: "faixa",
     header: "Faixa",
     accessorFn: (row) => classificarFaixa(row, HOJE),
@@ -73,21 +84,5 @@ export const contractColumns: ColumnDef<Contract>[] = [
       const faixa = classificarFaixa(row.original, HOJE);
       return <Badge variant={FAIXA_BADGE_VARIANT[faixa]}>{FAIXA_META[faixa].label}</Badge>;
     },
-  },
-  {
-    id: "etapa",
-    header: "Etapa",
-    accessorFn: (row) => FLOW_STAGE_MAP[row.etapaAtualId].nome,
-    cell: ({ row }) => <span className="text-xs text-muted-foreground">{FLOW_STAGE_MAP[row.original.etapaAtualId].nome}</span>,
-  },
-  {
-    id: "acoes",
-    header: "",
-    enableSorting: false,
-    cell: () => (
-      <Button variant="ghost" size="icon-sm">
-        <Eye className="size-3.5" />
-      </Button>
-    ),
   },
 ];

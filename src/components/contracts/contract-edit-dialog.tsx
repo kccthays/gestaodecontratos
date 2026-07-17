@@ -18,7 +18,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -48,7 +47,7 @@ export function ContractEditDialog({
 
   return (
     <Dialog open={!!contratoId} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+      <DialogContent className="max-h-[96vh] max-w-2xl gap-2.5 overflow-y-auto overflow-x-hidden p-5">
         {contrato && <EditForm key={contrato.id} contrato={contrato} onClose={onClose} />}
       </DialogContent>
     </Dialog>
@@ -131,69 +130,40 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
 
   return (
     <>
-      <DialogHeader>
+      <DialogHeader className="gap-0.5">
         <DialogTitle>Editar contrato {contrato.numero}</DialogTitle>
-        <DialogDescription>
-          Altere as informações do contrato. Mudar a etapa para “Nova Vigência” marca o contrato como
-          concluído. As alterações valem em todas as páginas.
-        </DialogDescription>
+        <DialogDescription className="text-xs">As alterações valem em todas as páginas.</DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-3.5">
-        <div className="space-y-1.5">
-          <Label htmlFor="edit-empresa">Empresa</Label>
-          <Input id="edit-empresa" value={form.empresa} onChange={(e) => set("empresa", e.target.value)} />
+      <div className="space-y-1.5 [&_input]:h-8">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Campo id="edit-empresa" label="Empresa">
+            <Input id="edit-empresa" value={form.empresa} onChange={(e) => set("empresa", e.target.value)} />
+          </Campo>
+          <Campo id="edit-fiscal" label="Fiscal">
+            <Input id="edit-fiscal" value={form.fiscal} onChange={(e) => set("fiscal", e.target.value)} />
+          </Campo>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="edit-objeto">Objeto</Label>
+        <Campo id="edit-objeto" label="Objeto">
           <Textarea
             id="edit-objeto"
-            rows={2}
+            rows={1}
+            className="min-h-8"
             value={form.objeto}
             onChange={(e) => set("objeto", e.target.value)}
           />
-        </div>
+        </Campo>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-fiscal">Fiscal</Label>
-            <Input id="edit-fiscal" value={form.fiscal} onChange={(e) => set("fiscal", e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-responsavel">Responsável atual</Label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Campo id="edit-responsavel" label="Responsável atual">
             <Input
               id="edit-responsavel"
               value={form.responsavelAtual}
               onChange={(e) => set("responsavelAtual", e.target.value)}
             />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-inicio">Início da vigência</Label>
-            <Input
-              id="edit-inicio"
-              type="date"
-              value={form.dataInicio}
-              onChange={(e) => set("dataInicio", e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-termino">Término da vigência</Label>
-            <Input
-              id="edit-termino"
-              type="date"
-              value={form.dataTermino}
-              onChange={(e) => set("dataTermino", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-valor">Valor (R$)</Label>
+          </Campo>
+          <Campo id="edit-valor" label="Valor (R$)">
             <Input
               id="edit-valor"
               type="number"
@@ -202,14 +172,29 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
               value={form.valor}
               onChange={(e) => set("valor", e.target.value)}
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-etapa">Etapa atual</Label>
-            <Select
-              value={form.etapaAtualId}
-              onValueChange={(v) => set("etapaAtualId", v as FlowStageId)}
-            >
-              <SelectTrigger id="edit-etapa" className="w-full">
+          </Campo>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Campo id="edit-inicio" label="Início da vigência">
+            <Input
+              id="edit-inicio"
+              type="date"
+              value={form.dataInicio}
+              onChange={(e) => set("dataInicio", e.target.value)}
+            />
+          </Campo>
+          <Campo id="edit-termino" label="Término da vigência">
+            <Input
+              id="edit-termino"
+              type="date"
+              value={form.dataTermino}
+              onChange={(e) => set("dataTermino", e.target.value)}
+            />
+          </Campo>
+          <Campo id="edit-etapa" label="Etapa atual">
+            <Select value={form.etapaAtualId} onValueChange={(v) => set("etapaAtualId", v as FlowStageId)}>
+              <SelectTrigger id="edit-etapa" size="sm" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -220,34 +205,35 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </Campo>
         </div>
 
         {concluido && (
-          <p className="flex items-center gap-1.5 rounded-lg bg-success-soft/50 px-3 py-2 text-xs font-medium text-success">
-            <CheckCircle2 className="size-3.5" /> Este contrato está marcado como concluído (nova vigência).
+          <p className="flex items-center gap-1.5 rounded-lg bg-success-soft/50 px-3 py-1.5 text-xs font-medium text-success">
+            <CheckCircle2 className="size-3.5" /> Contrato marcado como concluído (nova vigência).
           </p>
         )}
 
-        <ListaEditavel
-          icon={Mail}
-          titulo="E-mails da empresa"
-          placeholder="email@empresa.com.br"
-          tipo="email"
-          itens={form.emailsEmpresa}
-          onAdd={(v) => set("emailsEmpresa", [...form.emailsEmpresa, v])}
-          onRemove={(i) => set("emailsEmpresa", form.emailsEmpresa.filter((_, idx) => idx !== i))}
-        />
-
-        <ListaEditavel
-          icon={Landmark}
-          titulo="Órgãos públicos atendidos"
-          placeholder="Nome do órgão atendido"
-          tipo="text"
-          itens={form.orgaosAtendidos}
-          onAdd={(v) => set("orgaosAtendidos", [...form.orgaosAtendidos, v])}
-          onRemove={(i) => set("orgaosAtendidos", form.orgaosAtendidos.filter((_, idx) => idx !== i))}
-        />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ListaEditavel
+            icon={Mail}
+            titulo="E-mails da empresa"
+            placeholder="email@empresa.com.br"
+            tipo="email"
+            itens={form.emailsEmpresa}
+            onAdd={(v) => set("emailsEmpresa", [...form.emailsEmpresa, v])}
+            onRemove={(i) => set("emailsEmpresa", form.emailsEmpresa.filter((_, idx) => idx !== i))}
+          />
+          <ListaEditavel
+            icon={Landmark}
+            titulo="Órgãos públicos atendidos"
+            placeholder="Nome do órgão"
+            tipo="text"
+            itens={form.orgaosAtendidos}
+            onAdd={(v) => set("orgaosAtendidos", [...form.orgaosAtendidos, v])}
+            onRemove={(i) => set("orgaosAtendidos", form.orgaosAtendidos.filter((_, idx) => idx !== i))}
+          />
+        </div>
 
         <div className="space-y-1.5">
           <Label className="flex items-center gap-1.5">
@@ -256,7 +242,7 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
               {docsEntregues}/{form.documentos.length} entregues
             </span>
           </Label>
-          <div className="space-y-0.5 rounded-lg border border-border/60 p-1.5">
+          <div className="grid grid-cols-1 gap-x-3 rounded-lg border border-border/60 p-1 sm:grid-cols-2">
             {form.documentos.map((doc, i) => (
               <div
                 key={`${doc.nome}-${i}`}
@@ -269,38 +255,45 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
                     toggleDocumento(i);
                   }
                 }}
-                className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent/50"
+                className="flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-md px-1.5 py-0.5 text-left transition-colors hover:bg-accent/50"
+                title={doc.nome}
               >
-                <Checkbox checked={doc.status === "entregue"} className="pointer-events-none" />
-                <span className="min-w-0 flex-1 truncate text-sm">{doc.nome}</span>
-                <Badge variant={doc.status === "entregue" ? "success" : "warning"} className="shrink-0 text-[10px]">
-                  {doc.status === "entregue" ? "Entregue" : "Pendente"}
-                </Badge>
+                <Checkbox checked={doc.status === "entregue"} className="pointer-events-none shrink-0" />
+                <span
+                  className={
+                    doc.status === "entregue"
+                      ? "min-w-0 flex-1 truncate text-xs"
+                      : "min-w-0 flex-1 truncate text-xs text-muted-foreground"
+                  }
+                >
+                  {doc.nome}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="edit-obs">Observação de status</Label>
-          <Textarea
-            id="edit-obs"
-            rows={2}
-            value={form.observacaoStatus}
-            onChange={(e) => set("observacaoStatus", e.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2.5">
-          <div>
-            <Label htmlFor="edit-plano">Plano de ação ativo</Label>
-            <p className="text-xs text-muted-foreground">Necessário para contratos em Zona Crítica</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Campo id="edit-obs" label="Observação de status">
+            <Textarea
+              id="edit-obs"
+              rows={1}
+              className="min-h-8"
+              value={form.observacaoStatus}
+              onChange={(e) => set("observacaoStatus", e.target.value)}
+            />
+          </Campo>
+          <div className="flex items-center justify-between gap-3 self-end rounded-lg border border-border/70 px-3 py-1.5">
+            <div className="min-w-0">
+              <Label htmlFor="edit-plano">Plano de ação ativo</Label>
+              <p className="text-[11px] text-muted-foreground">Necessário na Zona Crítica</p>
+            </div>
+            <Switch
+              id="edit-plano"
+              checked={form.temPlanoDeAcao}
+              onCheckedChange={(v) => set("temPlanoDeAcao", v)}
+            />
           </div>
-          <Switch
-            id="edit-plano"
-            checked={form.temPlanoDeAcao}
-            onCheckedChange={(v) => set("temPlanoDeAcao", v)}
-          />
         </div>
       </div>
 
@@ -311,6 +304,15 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
         <Button onClick={salvar}>Salvar alterações</Button>
       </DialogFooter>
     </>
+  );
+}
+
+function Campo({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  return (
+    <div className="min-w-0 space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      {children}
+    </div>
   );
 }
 
@@ -341,18 +343,20 @@ function ListaEditavel({
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="min-w-0 space-y-1.5">
       <Label className="flex items-center gap-1.5">
         <Icon className="size-3.5 text-muted-foreground" /> {titulo}
       </Label>
-      {itens.length > 0 ? (
+      {itens.length > 0 && (
         <div className="space-y-1">
           {itens.map((item, i) => (
             <div
               key={`${item}-${i}`}
-              className="flex items-center gap-2 rounded-lg border border-border/60 px-2.5 py-1.5 text-sm"
+              className="flex items-center gap-1.5 rounded-lg border border-border/60 px-2 py-1 text-xs"
             >
-              <span className="min-w-0 flex-1 truncate">{item}</span>
+              <span className="min-w-0 flex-1 truncate" title={item}>
+                {item}
+              </span>
               <button
                 type="button"
                 onClick={() => onRemove(i)}
@@ -364,14 +368,13 @@ function ListaEditavel({
             </div>
           ))}
         </div>
-      ) : (
-        <p className="text-xs text-muted-foreground">Nenhum item adicionado ainda.</p>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         <Input
           type={tipo}
           value={novo}
           placeholder={placeholder}
+          className="h-8 text-xs"
           onChange={(e) => setNovo(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -380,7 +383,7 @@ function ListaEditavel({
             }
           }}
         />
-        <Button type="button" variant="outline" size="sm" onClick={adicionar}>
+        <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={adicionar}>
           Adicionar
         </Button>
       </div>
