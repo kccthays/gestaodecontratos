@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { format } from "date-fns";
 import type { CalendarEvent, Contract, Penalty } from "@/types";
 import { gerarDatasetMock, HOJE } from "@/lib/mock-data";
@@ -10,6 +11,13 @@ import { recalcularFluxoPara } from "@/lib/flow-stages";
 
 const datasetInicial = gerarDatasetMock();
 const DATA_HOJE = format(HOJE, "yyyy-MM-dd");
+
+const safeStorage = createJSONStorage(() => {
+  if (typeof window === "undefined") {
+    return { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+  }
+  return window.localStorage;
+});
 
 export interface ImportacaoPendente {
   nomeArquivo: string;
@@ -44,7 +52,9 @@ interface ContractsState {
   reabrirContrato: (id: string) => void;
 }
 
-export const useContractsStore = create<ContractsState>((set, get) => ({
+export const useContractsStore = create<ContractsState>()(
+  persist(
+    (set, get) => ({
   contratos: datasetInicial.contratos,
   penalidades: datasetInicial.penalidades,
   eventos: datasetInicial.eventos,
@@ -139,7 +149,24 @@ export const useContractsStore = create<ContractsState>((set, get) => ({
         };
       }),
     })),
-}));
+    }),
+    {
+      name: "sigc-contratos",
+      version: 1,
+      storage: safeStorage,
+      // Persiste apenas os dados; estado de UI (painel, importação) fica de fora.
+      partialize: (s) => ({
+        contratos: s.contratos,
+        penalidades: s.penalidades,
+        eventos: s.eventos,
+        streakDesde: s.streakDesde,
+        ultimaAtualizacao: s.ultimaAtualizacao,
+        fonteDados: s.fonteDados,
+        nomeArquivoImportado: s.nomeArquivoImportado,
+      }),
+    }
+  )
+);
 
 export function useContratoSelecionado(): Contract | null {
   const painelContratoId = useContractsStore((s) => s.painelContratoId);

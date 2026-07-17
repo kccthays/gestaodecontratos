@@ -14,6 +14,7 @@ import type {
 import { FLOW_STAGES, stageIndex } from "@/lib/flow-stages";
 import { SeededRandom } from "@/lib/seed";
 import { isConcluido } from "@/lib/calculations";
+import { DOCUMENTOS_PRORROGACAO } from "@/lib/documentos-prorrogacao";
 
 export const HOJE = new Date(2026, 6, 16);
 export const STREAK_DESDE = format(subDays(HOJE, 47), "yyyy-MM-dd");
@@ -178,26 +179,51 @@ export function buildHistorico(fluxo: FlowStageState[], numero: string): Histori
   return eventos.sort((a, b) => (a.data < b.data ? 1 : -1));
 }
 
-const DOCUMENTOS_POOL = [
-  "Termo de Referência atualizado",
-  "Parecer técnico do fiscal",
-  "Certidão Negativa de Débitos (CND)",
-  "Minuta do Termo Aditivo",
-  "Parecer jurídico",
-  "Justificativa da prorrogação",
-  "Nota técnica orçamentária",
-  "Ato de designação do fiscal",
-  "Publicação no Diário Oficial",
-  "Certidão negativa trabalhista",
-];
-
-export function buildDocumentos(rnd: SeededRandom, progresso: number): DocumentoContrato[] {
-  const escolhidos = rnd.pickMany(DOCUMENTOS_POOL, rnd.int(5, 7));
-  return escolhidos.map((nome) => ({
+export function buildDocumentos(progresso: number): DocumentoContrato[] {
+  // Os documentos de prorrogação são juntados ao processo em sequência: quanto
+  // mais avançada a prorrogação, mais itens já entregues.
+  const entregues = Math.round(progresso * DOCUMENTOS_PRORROGACAO.length);
+  return DOCUMENTOS_PRORROGACAO.map((nome, i) => ({
     nome,
     tipo: "PDF",
-    status: rnd.bool(progresso) ? "entregue" : "pendente",
+    status: i < entregues ? "entregue" : "pendente",
   }));
+}
+
+// Órgãos públicos que costumam ser atendidos pelos contratos da unidade.
+const ORGAOS_PUBLICOS_POOL = [
+  "Superintendência Regional de Administração no Estado do Mato Grosso do Sul",
+  "Gerência Regional de Administração em Campo Grande",
+  "Delegacia da Receita Federal em Campo Grande",
+  "Procuradoria-Geral da Fazenda Nacional em MS",
+  "Superintendência do Patrimônio da União em MS",
+  "Superintendência Regional do Trabalho em MS",
+  "Advocacia-Geral da União em Campo Grande",
+  "Departamento de Polícia Federal em MS",
+  "Instituto Nacional do Seguro Social — Gerência Campo Grande",
+  "Núcleo Estadual do Ministério da Saúde em MS",
+];
+
+const EMAIL_PREFIXOS = ["contato", "comercial", "financeiro", "contratos", "atendimento"];
+
+function slugEmpresa(nome: string): string {
+  return nome
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/ltda\.?|s\.?\/?a\.?|\bme\b|\bepp\b|&|\.|,/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 22);
+}
+
+function buildEmailsEmpresa(nome: string, rnd: SeededRandom): string[] {
+  const slug = slugEmpresa(nome) || "empresa";
+  const prefixos = rnd.pickMany(EMAIL_PREFIXOS, rnd.int(1, 3));
+  return prefixos.map((p) => `${p}@${slug}.com.br`);
+}
+
+function buildOrgaosAtendidos(rnd: SeededRandom): string[] {
+  return rnd.pickMany(ORGAOS_PUBLICOS_POOL, rnd.int(1, 3));
 }
 
 const CHECKLIST_POOL = [
@@ -288,12 +314,14 @@ function buildContract(seed: ContractSeed, rnd: SeededRandom, index: number): Co
     etapaAtualId: seed.etapaAtualId,
     fluxo,
     historico: buildHistorico(fluxo, seed.numero),
-    documentos: buildDocumentos(rnd, progresso),
+    documentos: buildDocumentos(progresso),
     checklist: buildChecklist(rnd, progresso),
     anoExercicio: seed.ano,
     temPlanoDeAcao: seed.temPlanoDeAcao ?? true,
     observacaoStatus: concluido ? "TA concluído com folga" : stageMeta.nome,
     diasAntecedenciaConclusao: seed.diasAntecedenciaConclusao,
+    emailsEmpresa: buildEmailsEmpresa(empresaInfo.nome, rnd),
+    orgaosAtendidos: buildOrgaosAtendidos(rnd),
   };
 }
 

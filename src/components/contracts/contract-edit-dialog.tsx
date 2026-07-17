@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Mail, Landmark, FileText, X } from "lucide-react";
 
 import {
   Dialog,
@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -66,12 +68,24 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
     etapaAtualId: contrato.etapaAtualId,
     temPlanoDeAcao: contrato.temPlanoDeAcao,
     observacaoStatus: contrato.observacaoStatus ?? "",
+    emailsEmpresa: contrato.emailsEmpresa ?? [],
+    orgaosAtendidos: contrato.orgaosAtendidos ?? [],
+    documentos: contrato.documentos.map((d) => ({ ...d })),
   });
 
   const concluido = form.etapaAtualId === "nova-vigencia";
 
   function set<K extends keyof typeof form>(campo: K, valor: (typeof form)[K]) {
     setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  function toggleDocumento(indice: number) {
+    setForm((f) => ({
+      ...f,
+      documentos: f.documentos.map((d, i) =>
+        i === indice ? { ...d, status: d.status === "entregue" ? "pendente" : "entregue" } : d
+      ),
+    }));
   }
 
   function salvar() {
@@ -89,6 +103,9 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
       etapaAtualId: form.etapaAtualId,
       temPlanoDeAcao: form.temPlanoDeAcao,
       observacaoStatus: form.observacaoStatus,
+      emailsEmpresa: form.emailsEmpresa,
+      orgaosAtendidos: form.orgaosAtendidos,
+      documentos: form.documentos,
     };
 
     if (etapaMudou) {
@@ -102,7 +119,6 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
         patch.diasAntecedenciaConclusao = undefined;
       }
     } else if (concluido && form.dataTermino !== contrato.dataTermino) {
-      // Continua concluído, mas a data de término mudou: recalcula a antecedência.
       patch.diasAntecedenciaConclusao = diasRestantes(form.dataTermino, HOJE);
     }
 
@@ -111,13 +127,15 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
     onClose();
   }
 
+  const docsEntregues = form.documentos.filter((d) => d.status === "entregue").length;
+
   return (
     <>
       <DialogHeader>
         <DialogTitle>Editar contrato {contrato.numero}</DialogTitle>
         <DialogDescription>
           Altere as informações do contrato. Mudar a etapa para “Nova Vigência” marca o contrato como
-          concluído.
+          concluído. As alterações valem em todas as páginas.
         </DialogDescription>
       </DialogHeader>
 
@@ -211,6 +229,58 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
           </p>
         )}
 
+        <ListaEditavel
+          icon={Mail}
+          titulo="E-mails da empresa"
+          placeholder="email@empresa.com.br"
+          tipo="email"
+          itens={form.emailsEmpresa}
+          onAdd={(v) => set("emailsEmpresa", [...form.emailsEmpresa, v])}
+          onRemove={(i) => set("emailsEmpresa", form.emailsEmpresa.filter((_, idx) => idx !== i))}
+        />
+
+        <ListaEditavel
+          icon={Landmark}
+          titulo="Órgãos públicos atendidos"
+          placeholder="Nome do órgão atendido"
+          tipo="text"
+          itens={form.orgaosAtendidos}
+          onAdd={(v) => set("orgaosAtendidos", [...form.orgaosAtendidos, v])}
+          onRemove={(i) => set("orgaosAtendidos", form.orgaosAtendidos.filter((_, idx) => idx !== i))}
+        />
+
+        <div className="space-y-1.5">
+          <Label className="flex items-center gap-1.5">
+            <FileText className="size-3.5 text-muted-foreground" /> Documentos de prorrogação
+            <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+              {docsEntregues}/{form.documentos.length} entregues
+            </span>
+          </Label>
+          <div className="space-y-0.5 rounded-lg border border-border/60 p-1.5">
+            {form.documentos.map((doc, i) => (
+              <div
+                key={`${doc.nome}-${i}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => toggleDocumento(i)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    toggleDocumento(i);
+                  }
+                }}
+                className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent/50"
+              >
+                <Checkbox checked={doc.status === "entregue"} className="pointer-events-none" />
+                <span className="min-w-0 flex-1 truncate text-sm">{doc.nome}</span>
+                <Badge variant={doc.status === "entregue" ? "success" : "warning"} className="shrink-0 text-[10px]">
+                  {doc.status === "entregue" ? "Entregue" : "Pendente"}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="edit-obs">Observação de status</Label>
           <Textarea
@@ -241,5 +311,79 @@ function EditForm({ contrato, onClose }: { contrato: Contract; onClose: () => vo
         <Button onClick={salvar}>Salvar alterações</Button>
       </DialogFooter>
     </>
+  );
+}
+
+function ListaEditavel({
+  icon: Icon,
+  titulo,
+  placeholder,
+  tipo,
+  itens,
+  onAdd,
+  onRemove,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  titulo: string;
+  placeholder: string;
+  tipo: "text" | "email";
+  itens: string[];
+  onAdd: (valor: string) => void;
+  onRemove: (indice: number) => void;
+}) {
+  const [novo, setNovo] = useState("");
+
+  function adicionar() {
+    const v = novo.trim();
+    if (!v) return;
+    onAdd(v);
+    setNovo("");
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <Label className="flex items-center gap-1.5">
+        <Icon className="size-3.5 text-muted-foreground" /> {titulo}
+      </Label>
+      {itens.length > 0 ? (
+        <div className="space-y-1">
+          {itens.map((item, i) => (
+            <div
+              key={`${item}-${i}`}
+              className="flex items-center gap-2 rounded-lg border border-border/60 px-2.5 py-1.5 text-sm"
+            >
+              <span className="min-w-0 flex-1 truncate">{item}</span>
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                className="flex size-5 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-danger-soft hover:text-danger"
+                aria-label={`Remover ${item}`}
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">Nenhum item adicionado ainda.</p>
+      )}
+      <div className="flex gap-2">
+        <Input
+          type={tipo}
+          value={novo}
+          placeholder={placeholder}
+          onChange={(e) => setNovo(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              adicionar();
+            }
+          }}
+        />
+        <Button type="button" variant="outline" size="sm" onClick={adicionar}>
+          Adicionar
+        </Button>
+      </div>
+    </div>
   );
 }

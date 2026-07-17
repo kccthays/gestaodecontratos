@@ -223,7 +223,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "sigc-acesso",
-      version: 1,
+      version: 2,
       storage: safeStorage,
       partialize: (s) => ({
         usuarioAtualId: s.usuarioAtualId,
@@ -231,6 +231,16 @@ export const useAuthStore = create<AuthState>()(
         perfis: s.perfis,
         infoInstitucional: s.infoInstitucional,
       }),
+      migrate: (persisted, version) => {
+        const estado = persisted as Partial<AuthState> | undefined;
+        // v2: o perfil "editor" passou a se chamar "Apoio".
+        if (estado?.perfis && version < 2) {
+          estado.perfis = estado.perfis.map((p) =>
+            p.id === "editor" && p.nome === "Editor" ? { ...p, nome: "Apoio" } : p
+          );
+        }
+        return estado as AuthState;
+      },
     }
   )
 );

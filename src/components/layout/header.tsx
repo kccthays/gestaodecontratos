@@ -122,10 +122,7 @@ export function Header({ onOpenSearch, onToggleMobileSidebar }: HeaderProps) {
           className="hidden items-center gap-2 rounded-lg border border-border bg-surface-solid/50 px-3 py-1.5 text-sm text-muted-foreground shadow-sm transition-colors hover:border-ring/50 hover:text-foreground sm:flex"
         >
           <Search className="size-3.5" />
-          <span>Pesquisar…</span>
-          <kbd className="ml-4 rounded border border-border bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] dark:bg-slate-800">
-            ⌘K
-          </kbd>
+          <span className="pr-2">Pesquisar…</span>
         </button>
         <Button variant="ghost" size="icon" className="sm:hidden" onClick={onOpenSearch} aria-label="Pesquisar">
           <Search className="size-4.5" />

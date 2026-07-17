@@ -199,12 +199,14 @@ export async function parseContractsWorkbook(file: File): Promise<ImportResult> 
       etapaAtualId,
       fluxo,
       historico: buildHistorico(fluxo, String(numero)),
-      documentos: buildDocumentos(rnd, progresso),
+      documentos: buildDocumentos(progresso),
       checklist: buildChecklist(rnd, progresso),
       anoExercicio: idx.anoExercicio !== -1 && row[idx.anoExercicio] ? Number(row[idx.anoExercicio]) : new Date(dataInicio).getFullYear(),
       temPlanoDeAcao: idx.temPlanoDeAcao !== -1 ? Boolean(row[idx.temPlanoDeAcao]) : true,
       observacaoStatus: concluido ? "TA concluído" : stageMeta.nome,
       diasAntecedenciaConclusao: concluido ? rnd.int(80, 130) : undefined,
+      emailsEmpresa: [],
+      orgaosAtendidos: [],
     });
   }
 

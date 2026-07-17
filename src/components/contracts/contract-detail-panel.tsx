@@ -12,6 +12,8 @@ import {
   ExternalLink,
   FileDown,
   FileText,
+  Landmark,
+  Mail,
   Pencil,
   ScrollText,
   User,
@@ -37,12 +39,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { ContractEditDialog } from "@/components/contracts/contract-edit-dialog";
 
 import { useContractsStore, useContratoSelecionado } from "@/store/use-contracts-store";
 import { usePermissao } from "@/hooks/use-auth";
@@ -75,18 +73,11 @@ export function ContractDetailPanel() {
   const contrato = useContratoSelecionado();
   const painelAberto = useContractsStore((s) => s.painelAberto);
   const fecharPainelContrato = useContractsStore((s) => s.fecharPainelContrato);
-  const atualizarContrato = useContractsStore((s) => s.atualizarContrato);
   const podeEditarContrato = usePermissao("editar_contratos");
 
-  const [editOpen, setEditOpen] = useState(false);
+  const [editando, setEditando] = useState(false);
   const [seiOpen, setSeiOpen] = useState(false);
   const [tab, setTab] = useState("geral");
-  const [form, setForm] = useState({
-    responsavelAtual: "",
-    observacaoStatus: "",
-    fiscal: "",
-    temPlanoDeAcao: true,
-  });
 
   if (!contrato) return null;
 
@@ -96,29 +87,6 @@ export function ContractDetailPanel() {
   const progressoGeral = Math.round(
     (contrato.fluxo.filter((f) => f.status === "concluida").length / FLOW_STAGES.length) * 100
   );
-
-  function abrirEdicao() {
-    if (!contrato) return;
-    setForm({
-      responsavelAtual: contrato.responsavelAtual,
-      observacaoStatus: contrato.observacaoStatus ?? "",
-      fiscal: contrato.fiscal,
-      temPlanoDeAcao: contrato.temPlanoDeAcao,
-    });
-    setEditOpen(true);
-  }
-
-  function salvarEdicao() {
-    if (!contrato) return;
-    atualizarContrato(contrato.id, {
-      responsavelAtual: form.responsavelAtual,
-      observacaoStatus: form.observacaoStatus,
-      fiscal: form.fiscal,
-      temPlanoDeAcao: form.temPlanoDeAcao,
-    });
-    toast.success(`Contrato ${contrato.numero} atualizado com sucesso.`);
-    setEditOpen(false);
-  }
 
   return (
     <>
@@ -191,6 +159,46 @@ export function ContractDetailPanel() {
                     value={`${formatarData(contrato.ultimaMovimentacao)} — ${contrato.ultimaMovimentacaoDescricao}`}
                     icon={Clock}
                   />
+
+                  <div>
+                    <p className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      <Mail className="size-3.5" /> E-mails da empresa
+                    </p>
+                    {contrato.emailsEmpresa?.length ? (
+                      <div className="flex flex-wrap gap-1.5">
+                        {contrato.emailsEmpresa.map((email) => (
+                          <a
+                            key={email}
+                            href={`mailto:${email}`}
+                            className="rounded-md bg-accent/50 px-2 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                          >
+                            {email}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhum e-mail cadastrado.</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="mb-1 flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                      <Landmark className="size-3.5" /> Órgãos públicos atendidos
+                    </p>
+                    {contrato.orgaosAtendidos?.length ? (
+                      <ul className="space-y-1">
+                        {contrato.orgaosAtendidos.map((orgao) => (
+                          <li key={orgao} className="flex items-start gap-1.5 text-sm">
+                            <span className="mt-1.5 size-1 shrink-0 rounded-full bg-muted-foreground/50" />
+                            <span>{orgao}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhum órgão cadastrado.</p>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-between gap-2 rounded-xl border border-border/70 bg-accent/30 px-3.5 py-2.5">
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Processo SEI</p>
@@ -299,7 +307,7 @@ export function ContractDetailPanel() {
 
           <SheetFooter className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {podeEditarContrato && (
-              <Button variant="outline" size="sm" onClick={abrirEdicao}>
+              <Button variant="outline" size="sm" onClick={() => setEditando(true)}>
                 <Pencil className="size-3.5" /> Editar
               </Button>
             )}
@@ -316,54 +324,10 @@ export function ContractDetailPanel() {
         </SheetContent>
       </Sheet>
 
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar contrato {contrato.numero}</DialogTitle>
-            <DialogDescription>Atualize as informações de acompanhamento do contrato.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3.5">
-            <div className="space-y-1.5">
-              <Label htmlFor="fiscal">Fiscal</Label>
-              <Input id="fiscal" value={form.fiscal} onChange={(e) => setForm((f) => ({ ...f, fiscal: e.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="responsavel">Responsável atual</Label>
-              <Input
-                id="responsavel"
-                value={form.responsavelAtual}
-                onChange={(e) => setForm((f) => ({ ...f, responsavelAtual: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="obs">Observação de status</Label>
-              <Textarea
-                id="obs"
-                value={form.observacaoStatus}
-                onChange={(e) => setForm((f) => ({ ...f, observacaoStatus: e.target.value }))}
-                rows={3}
-              />
-            </div>
-            <div className="flex items-center justify-between rounded-lg border border-border/70 px-3 py-2.5">
-              <div>
-                <Label htmlFor="plano">Plano de ação ativo</Label>
-                <p className="text-xs text-muted-foreground">Necessário para contratos em Zona Crítica</p>
-              </div>
-              <Switch
-                id="plano"
-                checked={form.temPlanoDeAcao}
-                onCheckedChange={(v) => setForm((f) => ({ ...f, temPlanoDeAcao: v }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={salvarEdicao}>Salvar alterações</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ContractEditDialog
+        contratoId={editando ? contrato.id : null}
+        onClose={() => setEditando(false)}
+      />
 
       <Dialog open={seiOpen} onOpenChange={setSeiOpen}>
         <DialogContent className="max-w-sm">

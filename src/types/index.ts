@@ -79,6 +79,8 @@ export interface Contract {
   temPlanoDeAcao: boolean;
   observacaoStatus?: string;
   diasAntecedenciaConclusao?: number;
+  emailsEmpresa: string[];
+  orgaosAtendidos: string[];
 }
 
 export type PenaltyCategory =

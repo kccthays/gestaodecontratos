@@ -115,7 +115,7 @@ export const PERFIS_PADRAO: PerfilAcesso[] = [
   },
   {
     id: "editor",
-    nome: "Editor",
+    nome: "Apoio",
     descricao:
       "Edita contratos, prorrogações, fluxo, processos SEI e relatórios do dia a dia.",
     cor: "success",
