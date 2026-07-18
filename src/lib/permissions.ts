@@ -146,14 +146,18 @@ export const PERFIS_PADRAO: PerfilAcesso[] = [
   },
 ];
 
-/** Informações institucionais corretas: SRA/MS — Campo Grande/MS. */
+/**
+ * Informações institucionais padrão — genéricas, apenas para exemplo.
+ * Cada órgão preenche os dados reais na tela de Configurações (ficam salvos
+ * localmente, não no código-fonte público).
+ */
 export const INFO_INSTITUCIONAL_PADRAO: InfoInstitucional = {
   sistema: "SIGC — Sistema Inteligente de Gestão de Contratos",
-  secretaria: "Secretaria de Serviços Compartilhados",
-  unidade: "Superintendência Regional de Administração no Estado do Mato Grosso do Sul",
-  setor: "Seção de Licitações e Contratos",
-  estado: "Mato Grosso do Sul",
-  cidade: "Campo Grande",
+  secretaria: "Órgão Público",
+  unidade: "Unidade Administrativa",
+  setor: "Setor de Licitações e Contratos",
+  estado: "UF",
+  cidade: "Cidade",
 };
 
 /**
@@ -162,42 +166,42 @@ export const INFO_INSTITUCIONAL_PADRAO: InfoInstitucional = {
  */
 export const USUARIOS_PADRAO: Usuario[] = [
   {
-    id: "u-thayssa",
-    nome: "Thayssa Kerollyn",
-    email: "thayssakerollyn@gmail.com",
-    cargo: "Coordenadora de Contratos",
-    setor: "Seção de Licitações e Contratos",
+    id: "u-admin",
+    nome: "Administrador",
+    email: "admin@example.com",
+    cargo: "Administrador do Sistema",
+    setor: "Setor de Contratos",
     perfilId: "administrador",
     senha: "admin123",
     ativo: true,
     criadoEm: "2026-01-05",
   },
   {
-    id: "u-carlos",
-    nome: "Carlos Andrade",
-    email: "carlos.andrade@sra.ms.gov.br",
+    id: "u-gestor",
+    nome: "Usuário Gestor",
+    email: "gestor@example.com",
     cargo: "Gestor de Contratos",
-    setor: "Seção de Licitações e Contratos",
+    setor: "Setor de Contratos",
     perfilId: "gestor",
     senha: "sigc123",
     ativo: true,
     criadoEm: "2026-02-10",
   },
   {
-    id: "u-mariana",
-    nome: "Mariana Lopes",
-    email: "mariana.lopes@sra.ms.gov.br",
+    id: "u-apoio",
+    nome: "Usuário Apoio",
+    email: "apoio@example.com",
     cargo: "Analista Administrativo",
-    setor: "Seção de Licitações e Contratos",
+    setor: "Setor de Contratos",
     perfilId: "editor",
     senha: "sigc123",
     ativo: true,
     criadoEm: "2026-02-18",
   },
   {
-    id: "u-rafael",
-    nome: "Rafael Souza",
-    email: "rafael.souza@sra.ms.gov.br",
+    id: "u-fiscal",
+    nome: "Usuário Fiscal",
+    email: "fiscal@example.com",
     cargo: "Fiscal de Contratos",
     setor: "Fiscalização de Contratos",
     perfilId: "fiscal",
@@ -206,11 +210,11 @@ export const USUARIOS_PADRAO: Usuario[] = [
     criadoEm: "2026-03-02",
   },
   {
-    id: "u-beatriz",
-    nome: "Beatriz Nunes",
-    email: "beatriz.nunes@sra.ms.gov.br",
+    id: "u-consulta",
+    nome: "Usuário Consulta",
+    email: "consulta@example.com",
     cargo: "Assistente Administrativo",
-    setor: "Seção de Licitações e Contratos",
+    setor: "Setor de Contratos",
     perfilId: "leitor",
     senha: "sigc123",
     ativo: false,

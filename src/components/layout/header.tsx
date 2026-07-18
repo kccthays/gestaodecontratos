@@ -112,7 +112,7 @@ export function Header({ onOpenSearch, onToggleMobileSidebar }: HeaderProps) {
           </span>
         </div>
         <span className="truncate text-[11px] text-muted-foreground/80">
-          {info.unidade} · {info.setor} · {info.cidade}/MS
+          {info.unidade} · {info.setor} · {info.cidade} — {info.estado}
         </span>
       </div>
 

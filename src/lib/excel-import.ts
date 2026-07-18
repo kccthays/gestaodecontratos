@@ -239,16 +239,16 @@ export function gerarModeloPlanilha(): void {
     ],
     [
       "31/2026",
-      "Exemplo Serviços Ltda.",
-      "12.345.678/0001-90",
+      "Empresa Exemplo Ltda.",
+      "00.000.000/0001-00",
       "Manutenção predial",
-      "Fulano de Tal",
+      "Fiscal Exemplo",
       "250000",
       "01/01/2024",
       "01/01/2027",
-      "23480.000001/2026-10",
+      "00000.000001/2026-10",
       "Fiscalização",
-      "Fulano de Tal",
+      "Fiscal Exemplo",
     ],
   ];
   const ws = XLSX.utils.aoa_to_sheet(dados);

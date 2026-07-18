@@ -91,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
         </main>
         <footer className="px-4 py-4 text-center text-[11px] text-muted-foreground/70 sm:px-6">
-          SIGC · {info.secretaria} · {info.unidade} · {info.cidade}/MS
+          SIGC · {info.secretaria} · {info.unidade} · {info.cidade} — {info.estado}
         </footer>
       </div>
 

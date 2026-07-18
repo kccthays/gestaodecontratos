@@ -152,7 +152,9 @@ export const useContractsStore = create<ContractsState>()(
     }),
     {
       name: "sigc-contratos",
-      version: 1,
+      // v2: dados de demonstração anonimizados — descarta contratos/penalidades
+      // antigos salvos localmente e recarrega os dados de exemplo genéricos.
+      version: 2,
       storage: safeStorage,
       // Persiste apenas os dados; estado de UI (painel, importação) fica de fora.
       partialize: (s) => ({

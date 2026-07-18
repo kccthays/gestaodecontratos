@@ -21,42 +21,44 @@ export const STREAK_DESDE = format(subDays(HOJE, 47), "yyyy-MM-dd");
 
 const iso = (d: Date) => format(d, "yyyy-MM-dd");
 
+// Dados de demonstração — empresas, pessoas e valores são todos fictícios,
+// gerados apenas para exemplo. Não representam contratos, empresas ou pessoas reais.
 const EMPRESAS: { nome: string; objeto: string }[] = [
-  { nome: "THF Elevadores Ltda.", objeto: "Manutenção preventiva e corretiva de elevadores e plataformas" },
-  { nome: "Serviços Gerais Alfa Ltda.", objeto: "Limpeza, conservação e higienização predial" },
-  { nome: "Vigilância Total Segurança Patrimonial Ltda.", objeto: "Vigilância armada e desarmada nas dependências" },
-  { nome: "TechNet Soluções em TI Ltda.", objeto: "Suporte técnico e manutenção de infraestrutura de redes" },
-  { nome: "Construtora Horizonte Engenharia Ltda.", objeto: "Manutenção predial e pequenas reformas" },
-  { nome: "Sabor & Cia Refeições Corporativas Ltda.", objeto: "Fornecimento de refeições coletivas" },
-  { nome: "Climatiza Ar Condicionado Ltda.", objeto: "Manutenção de sistemas de climatização e refrigeração" },
-  { nome: "GraphTech Gráfica e Editora Ltda.", objeto: "Serviços de impressão, reprografia e editoração" },
-  { nome: "Facilities Prime Gestão Predial Ltda.", objeto: "Gestão de facilities, portaria e recepção" },
-  { nome: "Rede Postos Combustível Ltda.", objeto: "Fornecimento de combustíveis para frota oficial" },
-  { nome: "TransLog Transportes e Logística Ltda.", objeto: "Locação de veículos oficiais com motorista" },
-  { nome: "SegurTec Monitoramento Eletrônico Ltda.", objeto: "Monitoramento eletrônico e circuito interno de câmeras" },
-  { nome: "Jardim Verde Paisagismo Ltda.", objeto: "Manutenção de áreas verdes e paisagismo" },
-  { nome: "DataCenter Brasil Hospedagem Ltda.", objeto: "Hospedagem de dados, nuvem e backup corporativo" },
-  { nome: "Cópias & Cia Locação de Equipamentos Ltda.", objeto: "Locação de impressoras e copiadoras multifuncionais" },
-  { nome: "Água Pura Distribuidora Ltda.", objeto: "Fornecimento de água mineral e bebedouros" },
-  { nome: "Elevar Manutenção Predial Ltda.", objeto: "Manutenção de sistemas prediais e hidráulicos" },
-  { nome: "ConsultTec Consultoria em Gestão Ltda.", objeto: "Consultoria especializada em gestão pública" },
-  { nome: "Rede Telecom Comunicações Ltda.", objeto: "Serviços de telefonia fixa, móvel e dados" },
-  { nome: "Praticidade Suprimentos de Escritório Ltda.", objeto: "Fornecimento de material de expediente" },
+  { nome: "Empresa Contratada 01 Ltda.", objeto: "Manutenção preventiva e corretiva de elevadores e plataformas" },
+  { nome: "Empresa Contratada 02 Ltda.", objeto: "Limpeza, conservação e higienização predial" },
+  { nome: "Empresa Contratada 03 Ltda.", objeto: "Vigilância armada e desarmada nas dependências" },
+  { nome: "Empresa Contratada 04 Ltda.", objeto: "Suporte técnico e manutenção de infraestrutura de redes" },
+  { nome: "Empresa Contratada 05 Ltda.", objeto: "Manutenção predial e pequenas reformas" },
+  { nome: "Empresa Contratada 06 Ltda.", objeto: "Fornecimento de refeições coletivas" },
+  { nome: "Empresa Contratada 07 Ltda.", objeto: "Manutenção de sistemas de climatização e refrigeração" },
+  { nome: "Empresa Contratada 08 Ltda.", objeto: "Serviços de impressão, reprografia e editoração" },
+  { nome: "Empresa Contratada 09 Ltda.", objeto: "Gestão de facilities, portaria e recepção" },
+  { nome: "Empresa Contratada 10 Ltda.", objeto: "Fornecimento de combustíveis para frota oficial" },
+  { nome: "Empresa Contratada 11 Ltda.", objeto: "Locação de veículos oficiais com motorista" },
+  { nome: "Empresa Contratada 12 Ltda.", objeto: "Monitoramento eletrônico e circuito interno de câmeras" },
+  { nome: "Empresa Contratada 13 Ltda.", objeto: "Manutenção de áreas verdes e paisagismo" },
+  { nome: "Empresa Contratada 14 Ltda.", objeto: "Hospedagem de dados, nuvem e backup corporativo" },
+  { nome: "Empresa Contratada 15 Ltda.", objeto: "Locação de impressoras e copiadoras multifuncionais" },
+  { nome: "Empresa Contratada 16 Ltda.", objeto: "Fornecimento de água mineral e bebedouros" },
+  { nome: "Empresa Contratada 17 Ltda.", objeto: "Manutenção de sistemas prediais e hidráulicos" },
+  { nome: "Empresa Contratada 18 Ltda.", objeto: "Consultoria especializada em gestão pública" },
+  { nome: "Empresa Contratada 19 Ltda.", objeto: "Serviços de telefonia fixa, móvel e dados" },
+  { nome: "Empresa Contratada 20 Ltda.", objeto: "Fornecimento de material de expediente" },
 ];
 
 const FISCAIS = [
-  "Marcos Vinícius Andrade",
-  "Fernanda Lima Rocha",
-  "Carlos Eduardo Santos",
-  "Juliana Ferreira Costa",
-  "Rodrigo Almeida Souza",
-  "Patrícia Gomes Ribeiro",
-  "André Luiz Barbosa",
-  "Camila Duarte Nunes",
-  "Bruno Henrique Martins",
-  "Larissa Cardoso Pinto",
-  "Eduardo Nogueira Farias",
-  "Tatiane Moreira Castro",
+  "Fiscal 01",
+  "Fiscal 02",
+  "Fiscal 03",
+  "Fiscal 04",
+  "Fiscal 05",
+  "Fiscal 06",
+  "Fiscal 07",
+  "Fiscal 08",
+  "Fiscal 09",
+  "Fiscal 10",
+  "Fiscal 11",
+  "Fiscal 12",
 ];
 
 const TYPICAL_DURATION: Record<FlowStageId, number> = {
@@ -85,7 +87,7 @@ function stageResponsavel(stageId: FlowStageId, fiscal: string): string {
     case "juridico":
       return "Procuradoria Jurídica";
     case "assinaturas":
-      return "Gabinete da Superintendência";
+      return "Gabinete da Autoridade Competente";
     case "publicacao":
       return "Núcleo de Comunicação";
     case "nova-vigencia":
@@ -192,16 +194,14 @@ export function buildDocumentos(progresso: number): DocumentoContrato[] {
 
 // Órgãos públicos que costumam ser atendidos pelos contratos da unidade.
 const ORGAOS_PUBLICOS_POOL = [
-  "Superintendência Regional de Administração no Estado do Mato Grosso do Sul",
-  "Gerência Regional de Administração em Campo Grande",
-  "Delegacia da Receita Federal em Campo Grande",
-  "Procuradoria-Geral da Fazenda Nacional em MS",
-  "Superintendência do Patrimônio da União em MS",
-  "Superintendência Regional do Trabalho em MS",
-  "Advocacia-Geral da União em Campo Grande",
-  "Departamento de Polícia Federal em MS",
-  "Instituto Nacional do Seguro Social — Gerência Campo Grande",
-  "Núcleo Estadual do Ministério da Saúde em MS",
+  "Órgão Público 01",
+  "Órgão Público 02",
+  "Órgão Público 03",
+  "Órgão Público 04",
+  "Órgão Público 05",
+  "Órgão Público 06",
+  "Órgão Público 07",
+  "Órgão Público 08",
 ];
 
 const EMAIL_PREFIXOS = ["contato", "comercial", "financeiro", "contratos", "atendimento"];
@@ -219,7 +219,8 @@ function slugEmpresa(nome: string): string {
 function buildEmailsEmpresa(nome: string, rnd: SeededRandom): string[] {
   const slug = slugEmpresa(nome) || "empresa";
   const prefixos = rnd.pickMany(EMAIL_PREFIXOS, rnd.int(1, 3));
-  return prefixos.map((p) => `${p}@${slug}.com.br`);
+  // Domínio "example.com" é reservado pela IANA para exemplos — nunca é real.
+  return prefixos.map((p) => `${p}@${slug}.example.com`);
 }
 
 function buildOrgaosAtendidos(rnd: SeededRandom): string[] {
@@ -241,13 +242,14 @@ export function buildChecklist(rnd: SeededRandom, progresso: number): ChecklistI
 }
 
 export function gerarCNPJ(rnd: SeededRandom): string {
+  // CNPJ fictício, em formato de exemplo (não corresponde a empresa real).
   const p = () => rnd.int(0, 9);
-  return `${p()}${p()}.${p()}${p()}${p()}.${p()}${p()}${p()}/0001-${p()}${p()}`;
+  return `00.000.000/0001-${p()}${p()}`;
 }
 
 export function gerarSEI(rnd: SeededRandom, ano: number): string {
   const bloco = () => rnd.int(0, 9);
-  return `23480.${bloco()}${bloco()}${bloco()}${bloco()}${bloco()}${bloco()}/${ano}-${rnd.int(10, 99)}`;
+  return `00000.${bloco()}${bloco()}${bloco()}${bloco()}${bloco()}${bloco()}/${ano}-${rnd.int(10, 99)}`;
 }
 
 interface ContractSeed {
@@ -447,7 +449,7 @@ const EVENTOS_INSTITUCIONAIS = [
   { titulo: "Auditoria da CGU", offset: 9 },
   { titulo: "Treinamento SEI para fiscais", offset: -3 },
   { titulo: "Reunião de alinhamento jurídico", offset: 14 },
-  { titulo: "Apresentação de indicadores à Superintendência", offset: 21 },
+  { titulo: "Apresentação de indicadores à direção", offset: 21 },
   { titulo: "Capacitação em Gestão de Contratos", offset: -11 },
   { titulo: "Visita técnica — auditoria interna", offset: 27 },
 ];

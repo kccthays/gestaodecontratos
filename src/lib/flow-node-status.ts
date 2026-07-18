@@ -20,7 +20,7 @@ const GENERIC_RESPONSAVEL: Record<FlowStageId, string> = {
   fiscalizacao: "Fiscal do contrato",
   "area-tecnica": "Área Técnica Especializada",
   juridico: "Procuradoria Jurídica",
-  assinaturas: "Gabinete da Superintendência",
+  assinaturas: "Gabinete da Autoridade Competente",
   publicacao: "Núcleo de Comunicação",
   "nova-vigencia": "Concluído",
 };

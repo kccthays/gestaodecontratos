@@ -1,8 +1,11 @@
+"use client";
+
 import type { Contract, Penalty } from "@/types";
 import { agruparPorFaixa, estatisticasPenalidades, FAIXA_META, formatarData, formatarMoeda } from "@/lib/calculations";
 import { visaoGeralFluxo } from "@/lib/flow-calculations";
 import { prorrogacoesConcluidasStats } from "@/lib/indicators";
 import { calcularReconhecimento } from "@/lib/recognition";
+import { useAuthStore } from "@/store/use-auth-store";
 
 export type ReportType = "contratos" | "penalidades" | "indicadores" | null;
 
@@ -13,10 +16,11 @@ interface ReportPrintTemplateProps {
 }
 
 function Header({ title }: { title: string }) {
+  const info = useAuthStore((s) => s.infoInstitucional);
   return (
     <div style={{ borderBottom: "3px solid #1351b4", paddingBottom: 12, marginBottom: 16 }}>
       <p style={{ fontSize: 11, color: "#475467" }}>
-        SIGC · Superintendência Regional de Administração no Estado do Mato Grosso do Sul · Seção de Licitações e Contratos · Campo Grande/MS
+        SIGC · {info.unidade} · {info.setor} · {info.cidade} — {info.estado}
       </p>
       <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0b2a5c" }}>{title}</h1>
       <p style={{ fontSize: 10, color: "#98a2b3" }}>Emitido em {formatarData(new Date().toISOString().slice(0, 10))}</p>

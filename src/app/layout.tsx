@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SIGC — Sistema Inteligente de Gestão de Contratos",
   description:
-    "Sistema Inteligente de Gestão de Contratos da Superintendência Regional de Administração no Estado do Mato Grosso do Sul — Seção de Licitações e Contratos, Campo Grande/MS.",
+    "Sistema Inteligente de Gestão de Contratos — acompanhamento de contratos, prorrogações, penalidades e indicadores.",
 };
 
 export default function RootLayout({

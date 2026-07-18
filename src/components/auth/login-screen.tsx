@@ -64,7 +64,7 @@ export function LoginScreen() {
               id="email"
               type="email"
               autoComplete="username"
-              placeholder="seu.email@sra.ms.gov.br"
+              placeholder="seu.email@example.com"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -113,7 +113,7 @@ export function LoginScreen() {
         <p className="mt-5 text-center text-[11px] leading-relaxed text-muted-foreground/80">
           {info.unidade}
           <br />
-          {info.setor} · {info.cidade}/MS
+          {info.setor} · {info.cidade} — {info.estado}
         </p>
       </div>
     </div>
